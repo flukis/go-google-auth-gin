@@ -3,7 +3,9 @@ package presenter
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
+	"encoding/json"
+	"expenset/internals/service/auth"
+	"expenset/pkg/utils"
 	"io"
 	"net/http"
 	"time"
@@ -13,12 +15,13 @@ import (
 )
 
 type OAuthHandler struct {
-	cfg *oauth2.Config
-	url string
+	cfg         *oauth2.Config
+	url         string
+	authService auth.Register
 }
 
-func NewOAuthHandler(cfg *oauth2.Config, url string) *OAuthHandler {
-	return &OAuthHandler{cfg, url}
+func NewOAuthHandler(cfg *oauth2.Config, url string, authService auth.Register) *OAuthHandler {
+	return &OAuthHandler{cfg, url, authService}
 }
 
 func (h *OAuthHandler) Route(r *gin.RouterGroup) {
@@ -44,10 +47,20 @@ func (h *OAuthHandler) Login(ctx *gin.Context) {
 	ctx.Redirect(http.StatusTemporaryRedirect, u)
 }
 
+type OauthData struct {
+	ID      string `json:"id"`
+	Email   string `json:"email"`
+	Picture string `json:"picture"`
+}
+
 func (h *OAuthHandler) Callback(ctx *gin.Context) {
 	oauthState, err := ctx.Cookie("oauthstate")
 	if err != nil {
-		ctx.Status(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, &utils.ApiResponse{
+			Message: err.Error(),
+			Data:    nil,
+			Meta:    nil,
+		})
 		ctx.Abort()
 		return
 	}
@@ -62,14 +75,22 @@ func (h *OAuthHandler) Callback(ctx *gin.Context) {
 
 	token, err := h.cfg.Exchange(ctx, code)
 	if err != nil {
-		ctx.Status(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, &utils.ApiResponse{
+			Message: err.Error(),
+			Data:    nil,
+			Meta:    nil,
+		})
 		ctx.Abort()
 		return
 	}
 
 	res, err := http.Get(h.url + token.AccessToken)
 	if err != nil {
-		ctx.Status(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, &utils.ApiResponse{
+			Message: err.Error(),
+			Data:    nil,
+			Meta:    nil,
+		})
 		ctx.Abort()
 		return
 	}
@@ -82,6 +103,33 @@ func (h *OAuthHandler) Callback(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Fprintf(ctx.Writer, "UserInfo: %s\n", contents)
-	ctx.Status(http.StatusOK)
+	var data OauthData
+	err = json.Unmarshal(contents, &data)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, &utils.ApiResponse{
+			Message: err.Error(),
+			Data:    nil,
+			Meta:    nil,
+		})
+		ctx.Abort()
+		return
+	}
+
+	registerData := auth.RegistrationRequest{
+		ID:    data.ID,
+		Email: data.Email,
+	}
+
+	resp := h.authService.Registration(ctx, registerData)
+	if resp.Error != nil {
+		ctx.JSON(resp.Error.Code, &utils.ApiResponse{
+			Message: resp.Error.Error.Error(),
+			Data:    nil,
+			Meta:    nil,
+		})
+		ctx.Abort()
+		return
+	}
+
+	ctx.Redirect(http.StatusTemporaryRedirect, "/home")
 }

@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS accounts (
+    id CHAR(21) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    PRIMARY KEY (id)
+)

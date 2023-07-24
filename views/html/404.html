@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content="5;url=/" />
+    <title>{{.title}}</title>
+    <meta name="description" content="Page Not Found" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <link
+      href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="flex h-full">
+    <div class="max-w-[50rem] flex flex-col mx-auto w-full h-full">
+      <div class="text-center py-8 px-4 sm:px-6 lg:px-8">
+        <h1
+          class="block font-bold text-gray-800 text-5xl md:text-5xl lg:text-6xl"
+        >
+          404
+        </h1>
+        <p class="text-gray-600 text-lg mb-16">
+          Sorry, we couldn't find your page.
+        </p>
+        <p class="text-blue-600 my-8">
+          you will be redirected to home page in 5 seconds
+        </p>
+        <p class="text-gray-600">if nothing happens, click link below</p>
+        <div
+          class="flex flex-col justify-center items-center gap-2 sm:flex-row sm:gap-3"
+        >
+          <a
+            class="w-full sm:w-auto inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold text-blue-500 hover:text-blue-700 focus:outline-none focus:ring-2 ring-offset-white focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm py-3 px-4"
+            href="/"
+          >
+            <svg
+              class="w-2.5 h-2.5"
+              width="11"
+              height="11"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M11.2792 1.64001L5.63273 7.28646C5.43747 7.48172 5.43747 7.79831 5.63273 7.99357L11.2792 13.64"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+            Back to home
+          </a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -2,9 +2,8 @@ package auth
 
 import (
 	"context"
-	"expenset/internals/storer/auth"
+	"expenset/internals/storer/account"
 	"expenset/pkg/utils"
-	"fmt"
 	"net/http"
 )
 
@@ -13,8 +12,8 @@ type Register interface {
 }
 
 type register struct {
-	authWriter auth.Writer
-	authReader auth.Reader
+	authWriter account.Writer
+	authReader account.Reader
 }
 
 type RegistrationRequest struct {
@@ -39,16 +38,11 @@ func (r *register) Registration(ctx context.Context, req RegistrationRequest) Re
 		}
 	}
 	// saved data to db
-	data := auth.Account{
+	data := account.Account{
 		ID:    req.ID,
 		Email: req.Email,
 	}
 	res, err := r.authWriter.Save(ctx, data)
-	fmt.Println("Makanan")
-	fmt.Println(req)
-	fmt.Println(existed)
-	fmt.Println(res)
-	fmt.Println(err)
 	if err != nil {
 		return RegistrationResponse{
 			ID:    "",
@@ -68,8 +62,8 @@ func (r *register) Registration(ctx context.Context, req RegistrationRequest) Re
 }
 
 func NewRegister(
-	authWriter auth.Writer,
-	authReader auth.Reader,
+	authWriter account.Writer,
+	authReader account.Reader,
 ) Register {
 	return &register{authWriter, authReader}
 }

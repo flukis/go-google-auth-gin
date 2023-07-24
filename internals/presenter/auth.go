@@ -32,14 +32,17 @@ func (h *OAuthHandler) Route(r *gin.RouterGroup) {
 }
 
 func (h *OAuthHandler) Login(ctx *gin.Context) {
-	var expirationTime = time.Now().Add(20 * time.Minute)
+	var expirationTime = time.Now().Add(60 * 24 * time.Hour)
 	bin := make([]byte, 16)
 	rand.Read(bin)
 	state := base64.URLEncoding.EncodeToString(bin)
 	cookie := http.Cookie{
-		Name:    "oauthstate",
-		Value:   state,
-		Expires: expirationTime,
+		Path:     "/",
+		Name:     "oauthstate",
+		Value:    state,
+		Expires:  expirationTime,
+		HttpOnly: true,
+		Secure:   true,
 	}
 	http.SetCookie(ctx.Writer, &cookie)
 
@@ -131,5 +134,5 @@ func (h *OAuthHandler) Callback(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Redirect(http.StatusTemporaryRedirect, "/home")
+	ctx.Redirect(http.StatusTemporaryRedirect, "/")
 }

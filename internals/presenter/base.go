@@ -1,6 +1,7 @@
 package presenter
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,18 +15,35 @@ func NewBaseHandler() *BaseHandler {
 }
 
 func (h *BaseHandler) Route(r *gin.RouterGroup) {
-	r.GET("/", h.LoginPage)
-	r.GET("/home", h.SuccessPage)
+	r.GET("/", h.HomePage)
 }
 
-func (h *BaseHandler) LoginPage(ctx *gin.Context) {
-	ctx.HTML(http.StatusOK, "login.html", gin.H{
-		"title": "Login With Google",
-	})
-}
+// type Books struct {
+// 	Title string `json:"title"`
+// 	Link  string `json:"link"`
+// }
 
-func (h *BaseHandler) SuccessPage(ctx *gin.Context) {
-	ctx.HTML(http.StatusOK, "home.html", gin.H{
-		"title": "Expenset",
-	})
+func (h *BaseHandler) HomePage(ctx *gin.Context) {
+	_, err := ctx.Cookie("oauthstate")
+	if err != nil {
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			ctx.HTML(http.StatusOK, "login.html", gin.H{
+				"title": "Login With Google",
+			})
+		default:
+			ctx.Status(http.StatusInternalServerError)
+			ctx.Abort()
+			return
+		}
+		return
+	}
+	// var b = []Books{
+	// 	{Title: "Catatan 1", Link: "/1"},
+	// 	{Title: "Catatan 2", Link: "/2"},
+	// }
+	// ctx.HTML(http.StatusOK, "home.html", gin.H{
+	// 	"title": "Expenset",
+	// 	"books": b,
+	// })
 }
